@@ -34,3 +34,17 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## About this frontend
+
+This repository contains the frontend for the JFT web project, built with Next.js (app router).
+It provides the UI layout, global styles, and the main pages under the `app/` directory.
+Use this project to develop and preview the client-side experience; API and backend logic live in a separate repository.
+
+Quick notes:
+
+- Run `npm run dev` to start the local dev server.
+- Main entry: `app/page.tsx` and layout in `app/layout.tsx`.
+- Static assets are in `public/`.
+
+Contributions: make feature branches, write concise commits, and open PRs targeting the `main` branch.
