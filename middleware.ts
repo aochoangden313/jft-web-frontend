@@ -19,7 +19,10 @@ export function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
-// Đồng bộ matcher với PROTECTED_PATHS để Next biết middleware áp dụng cho đường dẫn nào
+// Để Next.js phân tích tĩnh, matcher phải là mảng tĩnh, không dùng biến động
 export const config = {
-  matcher: PROTECTED_PATHS.map((p) => `${p}/:path*`),
+  matcher: [
+    "/exam/:path*",
+    // Thêm các path khác nếu cần
+  ],
 };
