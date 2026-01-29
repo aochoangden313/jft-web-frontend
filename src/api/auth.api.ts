@@ -1,12 +1,17 @@
 import { http } from "@/lib/http";
 
+export type Role = "USER" | "EDITOR" | "ADMIN";
+
 export type User = {
   id: string;
   email: string;
-  role: "admin" | "user";
+  role: Role;
 };
 
 export const authApi = {
-  me: () => http.get("users/me").json<User>(),
+  me: () => {
+    console.log("authApi.me called");
+    return http.get("users/me").json<User>();
+  },
   logout: () => http.post("auth/logout"),
 };
