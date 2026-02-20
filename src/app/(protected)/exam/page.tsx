@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-const EXAM_ID = "89f4a282-776f-450c-b431-757cb6e2b798";
+const EXAM_ID = "71cf2aec-4894-4f28-8dde-261c9fe49c1e";
 
 export default function ExamPage() {
   return (

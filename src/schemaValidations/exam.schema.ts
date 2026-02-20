@@ -29,3 +29,34 @@ export const ExamSessionSchema = z.object({
 });
 
 export type ExamSessionType = z.TypeOf<typeof ExamSessionSchema>;
+
+export const OptionSchema = z.object({
+  id: z.string(),
+  contentHtml: z.string(), // sửa từ text → contentHtml
+});
+
+export type OptionType = z.TypeOf<typeof OptionSchema>;
+
+export const QuestionWithAnswerSchema = z.object({
+  questionId: z.string(), // sửa từ id → questionId
+  order: z.number(), // sửa từ questionNumber → order
+  contentHtml: z.string(), // sửa từ text → contentHtml
+  selectedOptionId: z.string().nullable(),
+  answeredAt: z.string().datetime().nullable(),
+  options: z.array(OptionSchema),
+});
+
+export type QuestionWithAnswerType = z.TypeOf<typeof QuestionWithAnswerSchema>;
+
+export const SessionDetailSchema = z.object({
+  sessionId: z.string(),
+  examId: z.string(),
+  status: z.string(),
+  startTime: z.string().datetime(),
+  timeLimit: z.number(),
+  createdAt: z.string().datetime(),
+  submittedAt: z.string().datetime().nullable(),
+  questions: z.array(QuestionWithAnswerSchema),
+});
+
+export type SessionDetailType = z.TypeOf<typeof SessionDetailSchema>;
