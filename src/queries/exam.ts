@@ -50,3 +50,15 @@ export const useSaveAnswerMutation = () => {
     },
   });
 };
+
+export const useSubmitExamMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (examId: string) => examApiRequest.submitExam(examId),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sessionDetail"] });
+    },
+  });
+};

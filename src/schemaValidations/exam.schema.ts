@@ -74,3 +74,20 @@ export const SaveAnswerResponseSchema = z.object({
 });
 
 export type SaveAnswerResponseType = z.infer<typeof SaveAnswerResponseSchema>;
+
+export const SubmitExamResponseSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  examId: z.string(),
+  status: ExamSessionStatus,
+  startTime: z.string().datetime(),
+  timeLimit: z.number(),
+  totalCorrect: z.number().nullable(),
+  totalWrong: z.number().nullable(),
+  totalUnanswered: z.number().nullable(),
+  submittedAt: z.string().datetime().nullable(),
+  createdAt: z.string().datetime(),
+  deletedAt: z.string().datetime().nullable(),
+});
+
+export type SubmitExamResponseType = z.infer<typeof SubmitExamResponseSchema>;

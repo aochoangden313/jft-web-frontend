@@ -4,6 +4,7 @@ import type {
   ExamType,
   SaveAnswerResponseType,
   SessionDetailType,
+  SubmitExamResponseType,
 } from "@/schemaValidations/exam.schema";
 
 const prefix = "exams/";
@@ -30,6 +31,9 @@ const examApiRequest = {
     http
       .put(`${prefix}sessions/${sessionId}/answers`, { json: data })
       .json<SaveAnswerResponseType>(),
+
+  submitExam: (examId: string) =>
+    http.post(`${prefix}${examId}/submit`).json<SubmitExamResponseType>(),
 };
 
 export default examApiRequest;
