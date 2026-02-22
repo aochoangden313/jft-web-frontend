@@ -91,3 +91,37 @@ export const SubmitExamResponseSchema = z.object({
 });
 
 export type SubmitExamResponseType = z.infer<typeof SubmitExamResponseSchema>;
+
+// ResultOptionSchema - option với flag isCorrect
+export const ResultOptionSchema = z.object({
+  id: z.string(),
+  contentHtml: z.string(),
+  isCorrect: z.boolean(),
+});
+
+// ResultQuestionSchema - câu hỏi + kết quả (selectedOptionId, correctOptionId, isCorrect)
+export const ResultQuestionSchema = z.object({
+  questionId: z.string(),
+  order: z.number(),
+  contentHtml: z.string(),
+  selectedOptionId: z.string().nullable(),
+  correctOptionId: z.string().nullable(), // ← có thể null nếu chưa submit
+  isCorrect: z.boolean().nullable(),
+  options: z.array(ResultOptionSchema),
+});
+
+// ExamResultSchema - response từ API result
+export const ExamResultSchema = z.object({
+  sessionId: z.string(),
+  examId: z.string(),
+  status: z.literal("SUBMITTED"),
+  submittedAt: z.string().datetime(),
+  startTime: z.string().datetime(),
+  timeLimit: z.number(),
+  totalCorrect: z.number(),
+  totalWrong: z.number(),
+  totalUnanswered: z.number(),
+  questions: z.array(ResultQuestionSchema),
+});
+
+export type ExamResultType = z.infer<typeof ExamResultSchema>;

@@ -1,5 +1,6 @@
 import { http } from "@/lib/http";
 import type {
+  ExamResultType,
   ExamSessionType,
   ExamType,
   SaveAnswerResponseType,
@@ -34,6 +35,11 @@ const examApiRequest = {
 
   submitExam: (examId: string) =>
     http.post(`${prefix}${examId}/submit`).json<SubmitExamResponseType>(),
+
+  getExamResult: (examId: string, sessionId: string) =>
+    http
+      .get(`${prefix}${examId}/sessions/${sessionId}/result`)
+      .json<ExamResultType>(),
 };
 
 export default examApiRequest;

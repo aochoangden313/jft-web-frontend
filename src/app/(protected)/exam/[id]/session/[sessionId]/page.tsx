@@ -103,7 +103,7 @@ export default function ExamSessionPage() {
               {q.options.map((opt) => (
                 <label
                   key={opt.id}
-                  className="flex items-start space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors"
+                  className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors"
                 >
                   <input
                     type="radio"
@@ -111,7 +111,7 @@ export default function ExamSessionPage() {
                     value={opt.id}
                     checked={q.selectedOptionId === opt.id}
                     onChange={() => handeSelectOption(q.questionId, opt.id)}
-                    className="mt-1 cursor-pointer"
+                    className="flex-shrink-0 cursor-pointer"
                   />
                   <span
                     className="text-gray-700"

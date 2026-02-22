@@ -62,3 +62,19 @@ export const useSubmitExamMutation = () => {
     },
   });
 };
+
+export function useExamResultQuery({
+  examId,
+  sessionId,
+  enabled = true,
+}: {
+  examId: string;
+  sessionId: string;
+  enabled?: boolean;
+}) {
+  return useQuery({
+    queryKey: ["examResult", examId, sessionId],
+    queryFn: () => examApiRequest.getExamResult(examId, sessionId),
+    enabled: enabled && !!examId && !!sessionId,
+  });
+}
