@@ -6,11 +6,12 @@ import {
   useSessionDetailQuery,
   useSubmitExamMutation,
 } from "@/queries/exam";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useTimer } from "@/hooks/useTimer";
 
 export default function ExamSessionPage() {
   const params = useParams<{ id: string; sessionId: string }>();
+  const router = useRouter();
   const examId = params?.id ?? "";
   const sessionId = params?.sessionId ?? "";
   const { data, isLoading, isError, error } = useSessionDetailQuery({
@@ -18,7 +19,12 @@ export default function ExamSessionPage() {
     sessionId,
   });
 
-  const submitMutation = useSubmitExamMutation();
+  const submitMutation = useSubmitExamMutation({
+    onSuccess: () => {
+      // Redirect to result page after submit
+      router.push(`/exam/${examId}/session/${sessionId}/result`);
+    },
+  });
 
   const handleTimeExpired = useCallback(() => {
     submitMutation.mutate(examId);

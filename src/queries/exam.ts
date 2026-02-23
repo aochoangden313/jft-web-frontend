@@ -51,7 +51,7 @@ export const useSaveAnswerMutation = () => {
   });
 };
 
-export const useSubmitExamMutation = () => {
+export const useSubmitExamMutation = (options?: { onSuccess?: () => void }) => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -59,6 +59,7 @@ export const useSubmitExamMutation = () => {
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sessionDetail"] });
+      options?.onSuccess?.();
     },
   });
 };
