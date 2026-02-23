@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState, useMemo } from "react";
+import { useCallback, useState, useMemo, useRef, useEffect } from "react";
 import {
   useSaveAnswerMutation,
   useSessionDetailQuery,
@@ -11,6 +11,7 @@ import { useTimer } from "@/hooks/useTimer";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { SkeletonLayout } from "@/components/ui/skeleton-layout";
+import { QuestionNavigationSidebar } from "@/components/ui/question-navigation-sidebar";
 
 export default function ExamSessionPage() {
   const params = useParams<{ id: string; sessionId: string }>();
@@ -31,6 +32,22 @@ export default function ExamSessionPage() {
    * - setShowConfirmDialog: function để update state
    */
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+
+  /**
+   * 🎓 REFS ARRAY ĐỂ SCROLL ĐẾN CÂU HỎI
+   * Kiến thức: useRef để reference DOM elements
+   * - questionRefs: array của refs, 1 cho mỗi question
+   * - Dùng để gọi scrollIntoView() khi user click sidebar
+   */
+  const questionRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  /**
+   * 🎓 STATE QUẢN LÝ CÂU HỎI HIỆN TẠI
+   * Kiến thức: useState
+   * - currentQuestionIndex: index của câu hiện tại (0-based)
+   * - setCurrentQuestionIndex: update khi user click sidebar
+   */
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
   const submitMutation = useSubmitExamMutation({
     onSuccess: () => {
@@ -63,6 +80,36 @@ export default function ExamSessionPage() {
   const handleSubmitClick = () => {
     setShowConfirmDialog(true); // Mở dialog
   };
+
+  /**
+   * 🎓 HANDLER CHUYỂN CÂU HỎI + SCROLL
+   * Flow: User click Q1, Q2... trong sidebar → Update currentQuestionIndex → Scroll to question
+   */
+  const handleSelectQuestion = (index: number) => {
+    setCurrentQuestionIndex(index);
+    // Scroll to selected question with smooth behavior
+    setTimeout(() => {
+      questionRefs.current[index]?.scrollIntoView({
+        behavior: "smooth",
+        block: "start", // Align to top of viewport
+      });
+    }, 50); // Small delay để ensure ref is set
+  };
+
+  /**
+   * 🎓 EFFECT: AUTO-SCROLL KHI CURRENT QUESTION CHANGE
+   * Safety net nếu handleSelectQuestion scroll bị fail
+   */
+  useEffect(() => {
+    if (data && currentQuestionIndex < data.questions.length) {
+      setTimeout(() => {
+        questionRefs.current[currentQuestionIndex]?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 100);
+    }
+  }, [currentQuestionIndex, data]);
 
   /**
    * 🎓 HANDLER KHI XÁC NHẬN TRONG DIALOG
@@ -128,124 +175,148 @@ export default function ExamSessionPage() {
     return <div className="p-6 text-red-600">Lỗi: {String(error)}</div>;
   if (!data) return <div className="p-6">Không có dữ liệu...</div>;
 
+  // Prepare sidebar data
+  const sidebarQuestions = data.questions.map((q) => ({
+    id: q.questionId,
+    questionNumber: q.order,
+    selectedOptionId: q.selectedOptionId,
+  }));
+
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
-      {/* ═══ TIMER HEADER (Fixed Top) ═══ */}
-      <div className="bg-white border-b sticky top-0 z-10 p-4">
-        <div className="flex justify-between items-center mb-4">
-          {/* Timer Display */}
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-600">Thời gian còn lại:</span>
+    <div className="h-screen flex bg-gray-50">
+      {/* ═══ QUESTION NAVIGATION SIDEBAR ═══ */}
+      {/* Desktop only - hidden on mobile */}
+      <div className="hidden lg:block flex-shrink-0">
+        <QuestionNavigationSidebar
+          questions={sidebarQuestions}
+          currentQuestionIndex={currentQuestionIndex}
+          onSelectQuestion={handleSelectQuestion}
+        />
+      </div>
+
+      {/* ═══ MAIN CONTENT ═══ */}
+      <div className="flex-1 flex flex-col">
+        {/* ─── TIMER HEADER (Fixed Top) ─── */}
+        <div className="bg-white border-b sticky top-0 z-10 p-4">
+          <div className="flex justify-between items-center mb-4">
+            {/* Timer Display */}
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-gray-600">Thời gian còn lại:</span>
+              <div
+                className={`text-3xl font-bold font-mono ${
+                  isExpired
+                    ? "text-red-600"
+                    : isWarning
+                      ? "text-yellow-600"
+                      : "text-green-600"
+                }`}
+              >
+                {displayTime}
+              </div>
+            </div>
+
+            {/* Question Count */}
+            <div className="text-sm text-gray-600">
+              {data.questions.length} câu hỏi
+            </div>
+          </div>
+
+          {/* Progress Bar */}
+          <div className="w-full bg-gray-200 rounded-full h-2">
             <div
-              className={`text-3xl font-bold font-mono ${
+              className={`h-2 rounded-full transition-all ${
                 isExpired
-                  ? "text-red-600"
+                  ? "bg-red-600"
                   : isWarning
-                    ? "text-yellow-600"
-                    : "text-green-600"
+                    ? "bg-yellow-600"
+                    : "bg-green-600"
               }`}
-            >
-              {displayTime}
-            </div>
+              style={{ width: `${percentage}%` }}
+            />
           </div>
+        </div>
 
-          {/* Question Count */}
-          <div className="text-sm text-gray-600">
+        {/* ═══ QUESTIONS (Scrollable Content) ═══ */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+          <h2 className="text-2xl font-bold mb-6 text-gray-800">
             {data.questions.length} câu hỏi
-          </div>
-        </div>
-
-        {/* Progress Bar */}
-        <div className="w-full bg-gray-200 rounded-full h-2">
-          <div
-            className={`h-2 rounded-full transition-all ${
-              isExpired
-                ? "bg-red-600"
-                : isWarning
-                  ? "bg-yellow-600"
-                  : "bg-green-600"
-            }`}
-            style={{ width: `${percentage}%` }}
-          />
-        </div>
-      </div>
-
-      {/* ═══ QUESTIONS (Scrollable Content) ═══ */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-4">
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">
-          {data.questions.length} câu hỏi
-        </h2>
-        {data.questions.map((q) => (
-          <div
-            key={q.questionId}
-            className="bg-white border rounded-lg p-5 shadow-sm hover:shadow-md transition-shadow"
-          >
-            <h3 className="font-semibold text-gray-800 mb-4">
-              Câu {q.order}:{" "}
-              <span dangerouslySetInnerHTML={{ __html: q.contentHtml }} />
-            </h3>
-            <div className="space-y-3 pl-2">
-              {q.options.map((opt) => (
-                <label
-                  key={opt.id}
-                  className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors"
-                >
-                  <input
-                    type="radio"
-                    name={`q-${q.questionId}`}
-                    value={opt.id}
-                    checked={q.selectedOptionId === opt.id}
-                    onChange={() => handeSelectOption(q.questionId, opt.id)}
-                    className="flex-shrink-0 cursor-pointer"
-                  />
-                  <span
-                    className="text-gray-700"
-                    dangerouslySetInnerHTML={{ __html: opt.contentHtml }}
-                  />
-                </label>
-              ))}
+          </h2>
+          {data.questions.map((q, index) => (
+            <div
+              key={q.questionId}
+              id={`question-${index}`}
+              ref={(el) => {
+                if (el) questionRefs.current[index] = el;
+              }}
+              className="bg-white border rounded-lg p-5 shadow-sm hover:shadow-md transition-shadow scroll-mt-20"
+            >
+              <h3 className="font-semibold text-gray-800 mb-4">
+                Câu {q.order}:{" "}
+                <span dangerouslySetInnerHTML={{ __html: q.contentHtml }} />
+              </h3>
+              <div className="space-y-3 pl-2">
+                {q.options.map((opt) => (
+                  <label
+                    key={opt.id}
+                    className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors"
+                  >
+                    <input
+                      type="radio"
+                      name={`q-${q.questionId}`}
+                      value={opt.id}
+                      checked={q.selectedOptionId === opt.id}
+                      onChange={() => handeSelectOption(q.questionId, opt.id)}
+                      className="flex-shrink-0 cursor-pointer"
+                    />
+                    <span
+                      className="text-gray-700"
+                      dangerouslySetInnerHTML={{ __html: opt.contentHtml }}
+                    />
+                  </label>
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
 
-      {/* ═══ SUBMIT BUTTON (Fixed Bottom) ═══ */}
-      <div className="bg-white border-t p-6 flex justify-center gap-4 sticky bottom-0">
+        {/* ═══ SUBMIT BUTTON (Fixed Bottom) ═══ */}
+        <div className="bg-white border-t p-6 flex justify-center gap-4 sticky bottom-0">
+          {/**
+           * 🎓 THAY ĐỔI QUAN TRỌNG:
+           * - onClick: submitMutation.mutate() → handleSubmitClick()
+           * - Không submit ngay, mà mở dialog trước
+           */}
+          <button
+            onClick={handleSubmitClick}
+            disabled={submitMutation.isPending || isLoading}
+            className={`px-12 py-3 rounded-lg font-semibold text-white text-lg transition-all shadow-md hover:shadow-lg ${
+              submitMutation.isPending || isLoading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700 active:scale-95"
+            }`}
+          >
+            {submitMutation.isPending ? "⏳ Đang nộp..." : "✓ Nộp bài"}
+          </button>
+        </div>
+
         {/**
-         * 🎓 THAY ĐỔI QUAN TRỌNG:
-         * - onClick: submitMutation.mutate() → handleSubmitClick()
-         * - Không submit ngay, mà mở dialog trước
+         * 🎓 THÊM CONFIRM DIALOG
+         * - Render ở cuối component (outside main layout)
+         * - Dialog sẽ overlay lên toàn bộ màn hình
+         * - Position: fixed trong component
          */}
-        <button
-          onClick={handleSubmitClick}
-          disabled={submitMutation.isPending || isLoading}
-          className={`px-12 py-3 rounded-lg font-semibold text-white text-lg transition-all shadow-md hover:shadow-lg ${
-            submitMutation.isPending || isLoading
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-blue-600 hover:bg-blue-700 active:scale-95"
-          }`}
-        >
-          {submitMutation.isPending ? "⏳ Đang nộp..." : "✓ Nộp bài"}
-        </button>
+        <ConfirmDialog
+          open={showConfirmDialog}
+          title="Xác nhận nộp bài"
+          message="Bạn có chắc chắn muốn nộp bài? Bạn sẽ không thể thay đổi câu trả lời sau khi nộp."
+          confirmText="Nộp bài"
+          cancelText="Kiểm tra lại"
+          onConfirm={handleConfirmSubmit}
+          onCancel={handleCancelSubmit}
+          loading={submitMutation.isPending}
+          stats={questionStats}
+        />
       </div>
-
-      {/**
-       * 🎓 THÊM CONFIRM DIALOG
-       * - Render ở cuối component (outside main layout)
-       * - Dialog sẽ overlay lên toàn bộ màn hình
-       * - Position: fixed trong component
-       */}
-      <ConfirmDialog
-        open={showConfirmDialog}
-        title="Xác nhận nộp bài"
-        message="Bạn có chắc chắn muốn nộp bài? Bạn sẽ không thể thay đổi câu trả lời sau khi nộp."
-        confirmText="Nộp bài"
-        cancelText="Kiểm tra lại"
-        onConfirm={handleConfirmSubmit}
-        onCancel={handleCancelSubmit}
-        loading={submitMutation.isPending}
-        stats={questionStats}
-      />
     </div>
   );
 }
