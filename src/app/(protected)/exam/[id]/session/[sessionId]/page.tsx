@@ -10,6 +10,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useTimer } from "@/hooks/useTimer";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useToast } from "@/components/ui/use-toast";
+import { SkeletonLayout } from "@/components/ui/skeleton-layout";
 
 export default function ExamSessionPage() {
   const params = useParams<{ id: string; sessionId: string }>();
@@ -112,7 +113,17 @@ export default function ExamSessionPage() {
     });
   };
 
-  if (isLoading) return <div className="p-6">Đang tải câu hỏi...</div>;
+  /**
+   * 🎓 LOADING STATE VỚI SKELETON LAYOUT
+   * Pattern: Conditional rendering based on data state
+   *
+   * Kiến thức:
+   * 1. isLoading → Hiển thị skeleton loading layout
+   * 2. isError → Hiển thị error message
+   * 3. !data → Hiển thị fallback message
+   * 4. data → Hiển thị actual content
+   */
+  if (isLoading) return <SkeletonLayout />;
   if (isError)
     return <div className="p-6 text-red-600">Lỗi: {String(error)}</div>;
   if (!data) return <div className="p-6">Không có dữ liệu...</div>;
