@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { AlertCircle, RefreshCw } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useEffect } from "react";
+import { AlertCircle, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function Error({
   error,
@@ -13,7 +13,7 @@ export default function Error({
 }) {
   useEffect(() => {
     // Log lỗi để debug
-    console.error('🔴 Application Error:', error);
+    console.error("🔴 Application Error:", error);
   }, [error]);
 
   return (
@@ -28,16 +28,14 @@ export default function Error({
 
         {/* Error Title */}
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            Có lỗi xảy ra
-          </h1>
+          <h1 className="text-2xl font-bold text-gray-900">Có lỗi xảy ra</h1>
           <p className="text-gray-600 mt-2">
             Xin lỗi, ứng dụng gặp lỗi không mong muốn. Vui lòng thử lại.
           </p>
         </div>
 
         {/* Error Message (Development Only) */}
-        {process.env.NODE_ENV === 'development' && error?.message && (
+        {process.env.NODE_ENV === "development" && error?.message && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-left">
             <p className="text-xs font-mono text-red-700 break-words">
               {error.message}
@@ -55,7 +53,7 @@ export default function Error({
             Thử lại
           </Button>
           <Button
-            onClick={() => (window.location.href = '/')}
+            onClick={() => (window.location.href = "/")}
             variant="outline"
           >
             Quay về trang chủ

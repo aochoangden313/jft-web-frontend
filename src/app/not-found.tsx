@@ -1,6 +1,6 @@
-import { FileQuestion, Home, LogIn } from 'lucide-react';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+import { FileQuestion, Home, LogIn } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default function NotFound() {
   return (
@@ -35,10 +35,7 @@ export default function NotFound() {
             </Button>
           </Link>
           <Link href="/login" className="w-full sm:w-auto">
-            <Button
-              variant="outline"
-              className="w-full"
-            >
+            <Button variant="outline" className="w-full">
               <LogIn className="w-4 h-4 mr-2" />
               Đăng nhập
             </Button>
